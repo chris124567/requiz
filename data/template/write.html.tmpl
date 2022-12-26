@@ -1,0 +1,143 @@
+{{define "add_head"}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"></script>
+{{end}}
+
+{{template "base" .}}
+
+{{define "path"}}/{{.Set.ID}}/{{end}}
+{{define "title"}}Write: {{.Set.Title}}{{end}}
+{{define "description"}}Set {{.Set.Title}}{{end}}
+
+{{define "add_head"}}{{end}}
+
+{{define "main"}}
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <b>Remaining</b>: <span id="remaining"></span>
+            <br>
+            <b>Incorrect</b>: <span id="incorrect"></span>
+            <br>
+            <b>Correct</b>: <span id="correct"></span>
+            <br>
+            <b>Answer with Definition</b>: <input id="useTerm" type="checkbox">
+        </div>
+
+        <div class="vh-100 d-flex justify-content-center align-items-center">
+            <div class="col">
+                <div id="correction"></div>
+                <b>Question:</b><div id="question"></div>
+                <form id="answer">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input id="answerText" type="text" class="form-control is-small" placeholder="Answer" autofocus="autofocus" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false" variant="default" required>
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="submit">Submit</button>
+                            </span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+"use strict";
+function write() {
+    var questions = JSON.parse("{{json .Term}}");
+    for (var i = 0; i < questions.length; i++) {
+        if (questions[i].word === undefined) {
+            questions[i].word = "";
+        }
+        if (questions[i].definition === undefined) {
+            questions[i].definition = "";
+        }
+    }
+    var useTerm = true;
+    var correct = 0, incorrect = 0;
+    var remaining = questions.length;
+    function shuffle(array) {
+        for (var i = array.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+    function update() {
+        shuffle(questions);
+        document.getElementById("correct").innerHTML = String(correct);
+        document.getElementById("incorrect").innerHTML = String(incorrect);
+        document.getElementById("remaining").innerHTML = String(remaining);
+        var question = document.getElementById("question");
+        if (!question) {
+            return;
+        }
+        else if (questions.length === 0) {
+            question.innerHTML = "Complete!";
+            return;
+        }
+        var questionText = useTerm ? questions[0].word : questions[0].definition;
+        question.innerHTML = questionText.replace("\n", "<br>").trim();
+        if (!useTerm) {
+            if (questions[0]._imageUrl !== undefined) {
+                question.innerHTML =
+                    "<br><img style=\"max-width: 15rem; max-height: 15rem;\" class=\"img-fluid\"  src=\"" +
+                        questions[0]._imageUrl +
+                        "\">" +
+                        question.innerHTML;
+            }
+        }
+    }
+    document.getElementById("answer").addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (questions.length === 0) {
+            return;
+        }
+        var display = document.getElementById("correction");
+        if (!display) {
+            return;
+        }
+        display.innerHTML = "";
+        var answerText = document.getElementById("answerText");
+        if (!answerText) {
+            return;
+        }
+        if ((useTerm ? questions[0].definition : questions[0].word).toLowerCase().trim() ===
+            answerText.value.toLowerCase().trim()) {
+            correct++;
+            remaining--;
+        }
+        else {
+            incorrect++;
+            questions.push(questions[0]);
+            var fragment_1 = document.createDocumentFragment();
+            var span = document.createElement("span");
+            span.innerHTML = "<b>Correction</b>: ";
+            fragment_1.appendChild(span);
+            var diff = Diff.diffChars(useTerm ? questions[0].definition : questions[0].word, answerText.value);
+            diff.forEach(function (part) {
+                var color = part.added ? "green" : part.removed ? "red" : "grey";
+                var span = document.createElement("span");
+                span.style.color = color;
+                span.appendChild(document.createTextNode(part.value));
+                fragment_1.appendChild(span);
+            });
+            display.appendChild(fragment_1);
+        }
+        questions.shift();
+        update();
+        answerText.value = "";
+    });
+    document.getElementById("useTerm").addEventListener("change", function () {
+        useTerm = !useTerm;
+        update();
+    });
+    update();
+}
+document.addEventListener("DOMContentLoaded", write);
+</script>
+{{end}}
+

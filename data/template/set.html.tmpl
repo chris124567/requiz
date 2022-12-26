@@ -1,0 +1,48 @@
+{{template "base" .}}
+
+{{define "path"}}/{{.Set.ID}}{{end}}
+{{define "title"}}{{.Set.Title}} by {{.User.Username}}{{end}}
+{{define "description"}}Set {{.Set.Title}}{{end}}
+
+{{define "add_head"}}{{end}}
+
+{{define "main"}}
+<div class="content">
+  <div>
+    <b>Author</b>: <a class="is-link" href="/{{.User.Username}}">{{.User.Username}}</a>
+    <br>
+    <b>Title</b>: {{.Set.Title}}
+    <br>
+    <b>Last Modified</b>: {{timestamp .Set.LastModified}}
+    <br>
+    <b>Games</b>: <a href="/{{.Set.ID}}/learn">Learn</a> | <a href="/{{.Set.ID}}/write">Write</a>
+    <hr class="hr">
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Word</th>
+          <th>Definition</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{range .Term}}
+          <tr>
+            <td>
+              {{replaceNewline .Word}}
+            </td>
+            <td>
+              {{if not (eq (len .ImageURL) 0)}}
+                <img src="{{.ImageURL}}" alt="Image for {{.Word}}">
+                <br>
+              {{end}}
+              {{replaceNewline .Definition}}
+            </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+</div>
+{{end}}

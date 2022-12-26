@@ -1,0 +1,33 @@
+{{template "base" .}}
+
+{{define "path"}}/{{end}}
+{{define "title"}}ReQuiz{{end}}
+{{define "description"}}{{template "site_name" .}} - alternative frontend for Quizlet.{{end}}
+{{define "add_head"}}{{end}}
+
+{{define "main"}}
+
+
+<div class="container">
+    <div class="vh-100 d-flex justify-content-center align-items-center">
+        <div class="row">
+            <div class="text-center">
+                <h1>{{template "site_name" .}}</h1>
+                <p>An alternative frontend for Quizlet.</p>
+            </div>
+            <form action="/search?type=set">
+                <div class="form-group">
+                    <div class="input-group">
+                        <input type="hidden" name="type" value="set">
+                        <input autofocus="autofocus" class="form-control is-small" type="text" name="q" placeholder="Search..." required>
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="submit">Search</button>
+                        </span>
+                    </div>
+                </div>
+            </form>
+        </div>            
+    </div>
+</div>
+
+ {{end}}

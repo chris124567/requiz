@@ -1,0 +1,42 @@
+{{template "base" .}}
+
+{{define "path"}}/{{.User.Username}}{{end}}
+{{define "title"}}{{.User.Username}}{{end}}
+{{define "description"}}Sets made by {{.User.Username}}{{end}}
+
+{{define "add_head"}}{{end}}
+
+{{define "main"}}
+<div class="content">
+  <div>
+    <span class="subtitle">User <b>{{.User.Username}}</b> ({{len .Set}} public set{{if not (eq (len .Set) 1)}}s{{end}})</span>
+    <hr class="hr">
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Terms</th>
+          <th>Last Modified</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{range .Set}}
+          <tr>
+            <td>
+              <a href="/{{.ID}}">{{.Title}}</a>
+            </td>
+            <td>
+              {{.NumTerms}}
+            </td>
+            <td>
+              {{timestamp .LastModified}}
+            </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+</div>
+{{end}}

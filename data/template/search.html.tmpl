@@ -1,0 +1,65 @@
+{{template "base" .}}
+
+{{define "path"}}/search?q={{.Query}}{{end}}
+{{define "title"}}Results for {{.Query}}{{end}}
+{{define "description"}}Search results for query {{.Query}}.{{end}}
+
+{{define "add_head"}}{{end}}
+
+{{define "main"}}
+<div class="content">
+  <div class="slight-margin">
+    <span class="subtitle">Results for <b>{{.Query}}</b> (by <b><a href="/search?type=set&q={{.Query}}">Sets</a></b> | <b><a href="/search?type=user&q={{.Query}}">User</a></b>)</span>
+    <hr class="hr">
+
+    {{if eq .Type "set"}}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Terms</th>
+          <th>Last Modified</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{range .Set}}
+          <tr>
+            <td>
+              <a href="/{{.ID}}">{{.Title}}</a>
+            </td>
+            <td>
+              {{.NumTerms}}
+            </td>
+            <td>
+              {{timestamp .LastModified}}
+            </td>
+          </tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{end}}
+
+    {{if eq .Type "user"}}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Username</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{range .User}}
+        <tr>
+          <td>
+            <a href="/{{.Username}}">{{.Username}}</a>
+          </td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{end}}
+
+  </div>
+</div>
+{{end}}

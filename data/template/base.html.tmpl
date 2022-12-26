@@ -1,0 +1,65 @@
+{{define "site_name"}}ReQuiz{{end}}
+{{define "site_host"}}https://requiz.net{{end}}
+{{define "supported_site"}}Requiz{{end}}
+{{define "site_founded"}}2022{{end}}
+{{define "current_year"}}2022{{end}}
+
+{{define "description"}}{{end}}
+{{define "og_type"}}website{{end}}
+{{define "og_image"}}{{template "site_host" .}}/static/favicon.ico{{end}}
+{{define "add_head"}}{{end}}
+{{define "nav_query"}}{{end}}
+
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en" prefix="og: http://ogp.me/ns#">
+<head>
+    <meta charset="utf-8">
+    <meta name="robots" content="noarchive, noimageindex">
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="true">
+    <!-- Prevent accidental clicks -->
+    <meta name="format-detection" content="telephone=no, address=no, date=no">
+
+    <meta property="og:title" content="{{template "title" .}} | {{template "site_name" .}}">
+    <meta property="og:type" content="{{template "og_type" .}}">
+    <meta property="og:url" content="{{template "site_host" .}}{{template "path" .}}">
+    <meta property="og:image" content="{{template "og_image" .}}">
+    <meta property="og:description" content="{{template "description" .}}">
+    <meta property="og:site_name" content="{{template "site_name" .}}">
+    <meta name="description" content="{{template "description" .}}">
+
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <link type="text/css" rel="stylesheet" href="/static/merged.min.css">
+    <title>{{template "title" .}} | {{template "site_name" . }}</title>
+
+    {{template "add_head" .}}
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">{{template "site_name" .}}</a>
+    <div class="justify-content-end" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="/privacy-policy">Privacy Policy</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/terms-of-service">Terms of Service</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="slight-margin">
+    {{template "main" .}}
+</div>
+
+</body>
+</html>
+{{end}}

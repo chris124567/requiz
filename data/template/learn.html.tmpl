@@ -1,0 +1,217 @@
+{{define "add_head"}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"></script>
+{{end}}
+
+{{template "base" .}}
+
+{{define "path"}}/{{.Set.ID}}/{{end}}
+{{define "title"}}Learn: {{.Set.Title}}{{end}}
+{{define "description"}}Set {{.Set.Title}}{{end}}
+
+{{define "add_head"}}{{end}}
+
+{{define "main"}}
+
+<div class="container">
+    <div>
+        <b>Remaining</b>: <span id="remaining"></span>
+        <br>
+        <b>Incorrect</b>: <span id="incorrect"></span>
+        <br>
+        <b>Correct</b>: <span id="correct"></span>
+        <br>
+        <b>Answer with Definition</b>: <input id="useTerm" type="checkbox">
+        <br>
+        <br>
+        <b>Question:</b><div id="question"></div>
+        <br>
+    </div>
+    <div class="row">
+        <div id="option1" class="card col-sm-6 mb-3"></div>
+        <div id="option2" class="card col-sm-6 mb-3"></div>
+        <div id="option3" class="card col-sm-6 mb-3"></div>
+        <div id="option4" class="card col-sm-6 mb-3"></div>
+    </div>
+</div>
+
+<script>
+"use strict";
+function learn() {
+    var questions = JSON.parse("{{json .Term}}");
+    var allQuestions = JSON.parse("{{json .Term}}");
+    for (var i = 0; i < questions.length; i++) {
+        if (questions[i].word === undefined) {
+            questions[i].word = "";
+        }
+        if (questions[i].definition === undefined) {
+            questions[i].definition = "";
+        }
+    }
+    var lock = false;
+    var useTerm = true;
+    var correct = 0, incorrect = 0;
+    var remaining = questions.length;
+    function min(x, y) {
+        return x < y ? x : y;
+    }
+    function undefinedString(s) {
+        return s !== undefined ? s : "";
+    }
+    function shuffle(array) {
+        for (var i = array.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
+        }
+    }
+    function update() {
+        shuffle(questions);
+        shuffle(allQuestions);
+        document.getElementById("correct").innerHTML = String(correct);
+        document.getElementById("incorrect").innerHTML = String(incorrect);
+        document.getElementById("remaining").innerHTML = String(remaining);
+        var question = document.getElementById("question");
+        if (!question) {
+            return;
+        }
+        else if (questions.length === 0) {
+            lock = true;
+            question.innerHTML = "Complete!";
+            return;
+        }
+        var questionText = useTerm
+            ? undefinedString(questions[0].word)
+            : undefinedString(questions[0].definition);
+        question.innerHTML = questionText.replace("\n", "<br>").trim();
+        if (!useTerm && questions[0]._imageUrl !== undefined) {
+            question.innerHTML =
+                "<br><img style=\"max-width: 15rem; max-height: 15rem;\" src=\"" +
+                    questions[0]._imageUrl +
+                    "\"><br>" +
+                    question.innerHTML;
+        }
+        var options = [];
+        options.push({
+            correct: true,
+            _imageUrl: questions[0]._imageUrl,
+            text: useTerm
+                ? undefinedString(questions[0].definition)
+                : undefinedString(questions[0].word),
+        });
+        var i = 0;
+        var _loop_1 = function () {
+            var value = {
+                correct: false,
+                _imageUrl: allQuestions[i]._imageUrl,
+                text: useTerm
+                    ? undefinedString(allQuestions[i].definition)
+                    : undefinedString(allQuestions[i].word),
+            };
+            var includes = false;
+            options.forEach(function (option) {
+                if (option.text === value.text && option._imageUrl === value._imageUrl) {
+                    includes = true;
+                }
+            });
+            if (!includes) {
+                options.push(value);
+            }
+            i++;
+        };
+        while (options.length < min(4, allQuestions.length - 1) && i < allQuestions.length) {
+            _loop_1();
+        }
+        shuffle(options);
+        for (var i_1 = 0; i_1 < options.length; i_1++) {
+            var option = options[i_1];
+            if (!option) {
+                return;
+            }
+            var optionElement = document.getElementById("option" + (i_1 + 1));
+            if (!optionElement) {
+                console.log("no optionElement:", optionElement);
+                return;
+            }
+            optionElement.innerHTML =
+                "<div class=\"card-body\">" + option.text.replace("\n", "<br>").trim() + "</div>";
+            if (useTerm && option._imageUrl !== undefined) {
+                optionElement.innerHTML +=
+                    "<img style=\"max-width: 15rem; max-height: 15rem;\" class=\"card-img-top\" src=\"" +
+                        option._imageUrl +
+                        "\">" +
+                        optionElement.innerHTML;
+            }
+            if (option.correct) {
+                optionElement.setAttribute("correct", "correct");
+            }
+            else if (optionElement.getAttribute("correct") === "correct") {
+                optionElement.removeAttribute("correct");
+            }
+        }
+    }
+    document.getElementById("useTerm").addEventListener("change", function () {
+        useTerm = !useTerm;
+        update();
+    });
+    function optionClick(id) {
+        if (lock) {
+            return;
+        }
+        var option = document.getElementById(id);
+        if (!option) {
+            return;
+        }
+        var originalClass = option.getAttribute("class");
+        if (option.getAttribute("correct") === "correct") {
+            correct++;
+            remaining--;
+            option.setAttribute("class", originalClass + " list-group-item-success");
+        }
+        else {
+            incorrect++;
+            option.setAttribute("class", originalClass + " list-group-item-danger");
+            questions.push(questions[0]);
+        }
+        lock = true;
+        setTimeout(function () {
+            questions.shift();
+            option.setAttribute("class", originalClass);
+            update();
+            lock = false;
+        }, 265);
+    }
+    document.getElementById("option1").addEventListener("click", function () {
+        return optionClick("option1");
+    });
+    document.getElementById("option2").addEventListener("click", function () {
+        return optionClick("option2");
+    });
+    document.getElementById("option3").addEventListener("click", function () {
+        return optionClick("option3");
+    });
+    document.getElementById("option4").addEventListener("click", function () {
+        return optionClick("option4");
+    });
+    document.onkeypress = function (event) {
+        switch (event.code) {
+            case "Digit1":
+                optionClick("option1");
+                break;
+            case "Digit2":
+                optionClick("option2");
+                break;
+            case "Digit3":
+                optionClick("option3");
+                break;
+            case "Digit4":
+                optionClick("option4");
+                break;
+        }
+    };
+    update();
+}
+document.addEventListener("DOMContentLoaded", learn);
+</script>
+{{end}}
+
